@@ -16,12 +16,15 @@ const ChatScreen: React.FC = (navigation) => {
     ];
     let i = 0;
 
-    const testTurbo = async (question) => {
+    let prompt_text = `` // 안에 프롬프트 적기
+    // 내용으로는 글에서의 감정 분류, 대답만 나오게, -> 유도
+
+    const testTurbo = async (question: any) => {
         const data = JSON.stringify({
             "model" : "gpt-3.5-turbo",
-            "temperature": 0.5,
+            "temperature": 0.8,
             "messages": [
-                {"role": "system", "content": "You are a cook"},
+                // {"role": "system", "content": ""}, # 이거는 심리 치료사 ? 테라피스트 같은거 넣으면 될듯
                 {"role": "user", "content": question + prompt_text}
             ],
         });
@@ -43,7 +46,7 @@ const ChatScreen: React.FC = (navigation) => {
     
             const result = await response.json();
             return result;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error:', error.message);
             throw error;
         }
