@@ -1,18 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ScrollView, View, Text, TextInput, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { GPT_API } from '@env';
+import {NAVIGATOR_MAIN_PAGE2} from "../utils/screens";
+import { StackScreenProps } from "@react-navigation/stack";
+import { ParamListBase } from "@react-navigation/native";
+// import { GPT_API } from '@env';
+
+let GPT_API = ""
 
 type Message = {
     text: string;
     from: 'user' | 'bot';
 };
 
-const ChatScreen: React.FC = (navigation) => {
+let expression = ["/Volumes/드라이브/coding/App/gf/src/assets/none.png", "angry", "upset", "laugh", "glad", "beck", "surprised", "sad"]
+
+type Props = StackScreenProps<ParamListBase, "Landing Stack"	>;
+
+const ChatScreen:React.FC<Props> = ({navigation}) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const scrollViewRef = useRef<ScrollView>(null);
     const fakeMessages = [
-		"ㅎㅇ"
+		"토끼와 대화를 시작하세요!"
     ];
     let i = 0;
 
@@ -21,10 +30,10 @@ const ChatScreen: React.FC = (navigation) => {
 
     const testTurbo = async (question: any) => {
         const data = JSON.stringify({
-            "model" : "gpt-3.5-turbo",
+            "model" : "gpt-3.5-turbo-1106",
             "temperature": 0.8,
             "messages": [
-                // {"role": "system", "content": ""}, # 이거는 심리 치료사 ? 테라피스트 같은거 넣으면 될듯
+                {"role": "system", "content": "psychological counselor"}, // 이거는 심리 치료사 ? 테라피스트 같은거 넣으면 될듯
                 {"role": "user", "content": question + prompt_text}
             ],
         });
@@ -55,20 +64,22 @@ const ChatScreen: React.FC = (navigation) => {
 
     const handleSendMessage = () => {
         if (inputText.trim()) {
+            console.log(inputText)
             const newMessage: Message = { text: inputText, from: 'user' };
             setMessages(prevMessages => [...prevMessages, newMessage]);
             setInputText('');
-            setTimeout(() => {
-                sendFakeMessage(); // 여기서 보냄
-            }, 1000 + Math.random() * 1000);
+
+            testTurbo(inputText).then((response) => {
+                const newMessage: Message = { text: response.choices[0].message.content, from: 'bot' };
+                setMessages(prevMessages => [...prevMessages, newMessage]);
+            })
         }
     };
 
-    const sendFakeMessage = () => { // 이게 메시지 보내는 코드
+    const sendFakeMessage = () => { 
         if (i < fakeMessages.length) {
             const newMessage: Message = { text: fakeMessages[i], from: 'bot' };
             setMessages(prevMessages => [...prevMessages, newMessage]);
-            i++;
         }
     };
 
@@ -78,6 +89,8 @@ const ChatScreen: React.FC = (navigation) => {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity onPress={() => navigation.replace(NAVIGATOR_MAIN_PAGE2)} style={styles.changeRoom} />
+            <Image source={require("../assets/none.png")} style={styles.rabbit_logo} />
             <ScrollView
                 ref={scrollViewRef}
                 style={styles.messagesContainer}
@@ -115,7 +128,7 @@ const styles = StyleSheet.create({
 		paddingLeft: 20,
 		paddingRight: 20,
 		paddingBottom: 20,
-		marginTop: 50
+		marginTop: 200
     },
     messageText: {
         color: '#fff'
@@ -155,6 +168,24 @@ const styles = StyleSheet.create({
     },
     sendButtonText: {
         color: '#fff'
+    },
+    changeRoom: {
+		position: 'absolute',
+		top: 30,
+		right: 30,
+		width: '20%',
+		height: '10%',
+        zIndex: 1,
+		// backgroundColor: "white",
+	},
+    rabbit_logo: {
+        position: 'absolute',
+        top: 30,
+        left: 30,
+        // width: '10%',
+        // height: '10%',
+        zIndex: 10,
+        // backgroundColor: "white",
     }
 });
 
